@@ -78,8 +78,6 @@ void MultilayerPerceptron::freeMemory() {
 // ------------------------------
 // Feel all the weights (w) with random numbers between -1 and +1
 void MultilayerPerceptron::randomWeights() {
-	srand(time(0));
-
 	for(int i = 0; i < nOfLayers; i++){
 		for(int j = 0; j < layers[i].nOfNeurons; j++){
 			for(int k = 0; k < layers[i].nOfNeurons; k++){

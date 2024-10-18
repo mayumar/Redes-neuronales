@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
 
     // a: Option that requires an argument
     // a:: The argument required is optional
-    while ((c = getopt(argc, argv, "t:T:i:l:h:e:sw:p")) != -1)
+    while ((c = getopt(argc, argv, "t:T:i:l:h:e:m:sw:p")) != -1)
     {
         // The parameters needed for using the optional prediction mode of Kaggle have been included.
         // You should add the rest of parameters needed for the lab assignment.
@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
                 pflag = true;
                 break;
             case '?':
-                if (optopt == 'T' || optopt == 'w' || optopt == 'p')
+                if (optopt == 't' || optopt == 'T' || optopt == 'i' || optopt == 'h' || optopt == 'e' || optopt == 'w' || optopt == 'p')
                     fprintf (stderr, "The option -%c requires an argument.\n", optopt);
                 else if (isprint (optopt))
                     fprintf (stderr, "Unknown option `-%c'.\n", optopt);
@@ -100,16 +100,48 @@ int main(int argc, char **argv) {
         // Multilayer perceptron object
     	MultilayerPerceptron mlp;
 
-        // Parameters of the mlp. For example, mlp.eta = value;
-    	int iterations = -1; // This should be corrected
+        // Parameters of the mlp.
+        int iterations = 1000;
+        if(iflag)
+            iterations = int(*ivalue);
 
-        // Read training and test data: call to util::readData(...)
-    	Dataset * trainDataset = NULL; // This should be corrected
-    	Dataset * testDataset = NULL; // This should be corrected
+        float eta = 0.1;
+        if(eflag)
+            eta = float(*evalue);
+
+        float mu = 0.9;
+        if(mflag)
+            mu = float(*mvalue);
+
+
+        // Read training and test data
+        Dataset * trainDataset = NULL;
+        if(!tflag){
+            fprintf(stderr, "Training data is required.\n");
+            return EXIT_FAILURE;
+        }else{
+        	trainDataset = util::readData(tvalue);
+        }
+
+        Dataset * testDataset = NULL;
+        if(Tflag)
+        	testDataset = util::readData(Tvalue);
+        else
+            testDataset = util::readData(tvalue);
+
 
         // Initialize topology vector
-    	int layers=-1; // This should be corrected
-    	int * topology=NULL; // This should be corrected
+    	int layers = 1;
+        if(lflag)
+            layers = int(*lvalue);
+
+    	int * topology = new int[layers];
+        int neurons = 5;
+        if(hflag)
+            neurons = int(*hvalue);
+        for(int i = 0; i < layers; i++){
+            topology[i] = neurons;
+        }
 
         // Initialize the network using the topology vector
         mlp.initialize(layers+2,topology);
