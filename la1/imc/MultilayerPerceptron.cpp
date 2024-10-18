@@ -78,9 +78,10 @@ void MultilayerPerceptron::freeMemory() {
 // ------------------------------
 // Feel all the weights (w) with random numbers between -1 and +1
 void MultilayerPerceptron::randomWeights() {
-	for(int i = 0; i < nOfLayers; i++){
+	for(int i = 1; i < nOfLayers-1; i++){
 		for(int j = 0; j < layers[i].nOfNeurons; j++){
 			for(int k = 0; k < layers[i].nOfNeurons; k++){
+				//cout << "i: " << i << ", j: " << j << endl;
 				layers[i].neurons[j].w[k] = (rand() / RAND_MAX) * 2 -1;
 			}
 		}
@@ -133,7 +134,7 @@ void MultilayerPerceptron::restoreWeights() {
 void MultilayerPerceptron::forwardPropagate() {
 	double net;
 
-	for(int h = 0; h < nOfLayers; h++){
+	for(int h = 1; h < nOfLayers; h++){
 		for(int j = 0; j < layers[h].nOfNeurons; j++){
 			net = layers[h].neurons[j].w[0];
 			for(int i = 1; i < layers[h].nOfNeurons; i++){
@@ -198,7 +199,7 @@ void MultilayerPerceptron::accumulateChange() {
 // Update the network weights, from the first layer to the last one
 void MultilayerPerceptron::weightAdjustment() {
 
-	for(int h = 1; h < nOfLayers; h++){
+	for(int h = 0; h < nOfLayers; h++){
 		for(int j = 0; j < layers[h].nOfNeurons; j++){
 			for(int i = 0; i < layers[h-1].nOfNeurons; i++){
 				layers[h].neurons[j].w[i] = layers[h].neurons[j].w[i] - eta * layers[h].neurons[j].deltaW[i] - mu*(eta * layers[h].neurons[j].lastDeltaW[i]);
@@ -217,7 +218,19 @@ void MultilayerPerceptron::printNetwork() {
 // Perform an epoch: forward propagate the inputs, backpropagate the error and adjust the weights
 // input is the input vector of the pattern and target is the desired output vector of the pattern
 void MultilayerPerceptron::performEpochOnline(double* input, double* target) {
+	for(int i = 1; i < nOfLayers; i++){
+		for(int j = 0; j < layers[i].nOfNeurons; j++){
+			for(int k = 0; k < layers[i].nOfNeurons; k++){
+				layers[i].neurons[j].deltaW[k] = 0;
+			}
+		}
+	}
 
+	feedInputs(input);
+	forwardPropagate();
+	backpropagateError(target);
+	accumulateChange();
+	weightAdjustment();
 }
 
 // ------------------------------
@@ -225,6 +238,7 @@ void MultilayerPerceptron::performEpochOnline(double* input, double* target) {
 void MultilayerPerceptron::trainOnline(Dataset* trainDataset) {
 	int i;
 	for(i=0; i<trainDataset->nOfPatterns; i++){
+		cout << "hola" << endl;
 		performEpochOnline(trainDataset->inputs[i], trainDataset->outputs[i]);
 	}
 }
@@ -232,7 +246,13 @@ void MultilayerPerceptron::trainOnline(Dataset* trainDataset) {
 // ------------------------------
 // Test the network with a dataset and return the MSE
 double MultilayerPerceptron::test(Dataset* testDataset) {
-	return -1.0;
+	double mse = 0;
+
+	for(int i = 0; i < testDataset->nOfPatterns; i++){
+		mse += obtainError(testDataset->outputs[i]);
+	}
+
+	return mse/nOfLayers;
 }
 
 
