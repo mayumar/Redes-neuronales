@@ -135,13 +135,21 @@ int main(int argc, char **argv) {
         if(lflag)
             layers = int(*lvalue);
 
-    	int * topology = new int[layers];
+    	int * topology = new int[layers+2];
+        
+        int nin = trainDataset->nOfInputs;
+        int nout = trainDataset->nOfOutputs;
+
         int neurons = 5;
         if(hflag)
             neurons = int(*hvalue);
-        for(int i = 0; i < layers; i++){
+
+        for(int i = 1; i <= layers; i++){
             topology[i] = neurons;
         }
+
+        topology[0] = nin;
+        topology[layers+1] = nout;
 
         // Initialize the network using the topology vector
         mlp.initialize(layers+2,topology);
