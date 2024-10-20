@@ -103,15 +103,15 @@ int main(int argc, char **argv) {
         // Parameters of the mlp.
         int iterations = 1000;
         if(iflag)
-            iterations = int(*ivalue);
+            iterations = atoi(ivalue);
 
         float eta = 0.1;
         if(eflag)
-            eta = float(*evalue);
+            eta = atof(evalue);
 
         float mu = 0.9;
         if(mflag)
-            mu = float(*mvalue);
+            mu = atof(mvalue);
 
 
         // Read training and test data
@@ -133,7 +133,7 @@ int main(int argc, char **argv) {
         // Initialize topology vector
     	int layers = 1;
         if(lflag)
-            layers = int(*lvalue);
+            layers = atoi(lvalue);
 
     	int * topology = new int[layers+2];
         
@@ -142,10 +142,11 @@ int main(int argc, char **argv) {
 
         int neurons = 5;
         if(hflag)
-            neurons = int(*hvalue);
+            neurons = atoi(hvalue);
 
         for(int i = 1; i <= layers; i++){
             topology[i] = neurons;
+            //cout << "topology[" << i << "] = " << neurons << endl;
         }
 
         topology[0] = nin;
