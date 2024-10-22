@@ -154,7 +154,8 @@ int main(int argc, char **argv) {
 
         // Initialize the network using the topology vector
         mlp.initialize(layers+2,topology);
-
+        mlp.eta=eta;
+        mlp.mu=mu;
 
         // Seed for random numbers
         int seeds[] = {1,2,3,4,5};

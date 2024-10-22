@@ -236,3 +236,18 @@ double util::maxDatasetOutputs(Dataset *dataset)
     return max;
 }
 
+void util::plotData(const std::vector<double>& trainingErrors, const std::vector<double>& testErrors) {
+    std::ofstream dataFile("errors_data.dat");
+    for (size_t i = 0; i < trainingErrors.size(); ++i) {
+        dataFile << i << " " << trainingErrors[i] << " " << testErrors[i] << "\n";
+    }
+    dataFile.close();
+
+    // Enviar comandos a gnuplot
+    FILE *gnuplotPipe = popen("gnuplot -persistent", "w");
+    fprintf(gnuplotPipe, "set title 'Training and Test Error'\n");
+    fprintf(gnuplotPipe, "set xlabel 'Iterations'\n");
+    fprintf(gnuplotPipe, "set ylabel 'Error'\n");
+    fprintf(gnuplotPipe, "plot 'errors_data.dat' using 1:2 title 'Training Error' with lines, 'errors_data.dat' using 1:3 title 'Test Error' with lines\n");
+    fflush(gnuplotPipe);
+}

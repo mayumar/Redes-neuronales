@@ -13,6 +13,7 @@
 #include <string>
 #include <limits>
 #include <math.h>
+#include <vector>
 
 
 using namespace imc;
@@ -20,7 +21,7 @@ using namespace std;
 using namespace util;
 
 // ------------------------------
-// Constructor: Default values for all the parameters
+// Constructor[i]: Default values for all the parameters
 MultilayerPerceptron::MultilayerPerceptron()
 {
 	nOfLayers = 0;
@@ -209,6 +210,7 @@ void MultilayerPerceptron::backpropagateError(double* target) {
 				sum += layers[h+1].neurons[i].w[j] * layers[h+1].neurons[i].delta;
 			}
 			layers[h].neurons[j].delta = sum * layers[h].neurons[j].out * (1 - layers[h].neurons[j].out);
+			//cout<<__func__<<" delta ------->"<<layers[h].neurons[j].delta<<endl;
 		}
 	}
 }
@@ -244,7 +246,9 @@ void MultilayerPerceptron::weightAdjustment() {
 	for(int h = 1; h < nOfLayers; h++){
 		for(int j = 0; j < layers[h].nOfNeurons; j++){
 			for(int i = 0; i < layers[h-1].nOfNeurons; i++){
+				//cout<<__func__<<" ANTES ------->"<<layers[h].neurons[j].w[i]<<endl;
 				layers[h].neurons[j].w[i] += -eta * layers[h].neurons[j].deltaW[i] - mu * (eta * layers[h].neurons[j].lastDeltaW[i]);
+				//cout<<__func__<<" DESPUES ------->"<<layers[h].neurons[j].w[i]<<endl;
 				layers[h].neurons[j].lastDeltaW[i] = layers[h].neurons[j].deltaW[i];
 			}
 			int biasIndex = layers[h-1].nOfNeurons;
@@ -360,11 +364,17 @@ void MultilayerPerceptron::runOnlineBackPropagation(Dataset * trainDataset, Data
 	int iterWithoutImproving;
 	double testError = 0;
 
+	vector<double> trainingErrors;
+	vector<double> testErrors;
+
 	// Learning
 	do {
 
 		trainOnline(trainDataset);
 		double trainError = test(trainDataset);
+		double currentTestError = test(pDatosTest);
+		trainingErrors.push_back(trainError);
+		testErrors.push_back(currentTestError);
 		if(countTrain==0 || trainError < minTrainError){
 			minTrainError = trainError;
 			copyWeights();
@@ -390,6 +400,8 @@ void MultilayerPerceptron::runOnlineBackPropagation(Dataset * trainDataset, Data
 		// printNetwork();
 
 	} while ( countTrain<maxiter );
+
+	plotData(trainingErrors, testErrors);  // Llamar a la función que grafica los datos
 
 	cout << "NETWORK WEIGHTS" << endl;
 	cout << "===============" << endl;
