@@ -182,6 +182,22 @@ int main(int argc, char **argv) {
 
         double averageTestError = 0, stdTestError = 0;
         double averageTrainError = 0, stdTrainError = 0;
+
+        for(int i = 0; i < 5; i++) {
+            averageTrainError += trainErrors[i];
+            averageTestError += testErrors[i];
+        }
+        averageTrainError /= 5;
+        averageTestError /= 5;
+
+        for(int i = 0; i < 5; i++) {
+            stdTrainError += pow(trainErrors[i] - averageTrainError, 2);
+            stdTestError += pow(testErrors[i] - averageTestError, 2);
+        }
+        stdTrainError = sqrt(stdTrainError / 5);
+        stdTestError = sqrt(stdTestError / 5);
+
+
         
         // Obtain training and test averages and standard deviations
 
