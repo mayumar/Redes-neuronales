@@ -187,7 +187,7 @@ void MultilayerPerceptron::backpropagateError(double* target) {
 		// cout << "layers[" << lastLayer << "].neurons[" << j << "].delta = -(" << target[j] << "- " << llout << ") * " << llout << "* (1 - " << llout << ")" << endl;
 	}
 
-	for(int h = lastLayer-2; h > 0; h--){
+	for(int h = lastLayer-1; h > 0; h--){
 		for(int j = 0; j < layers[h].nOfNeurons; j++){
 			double sum = 0.0;
 			for(int i = 0; i < layers[h+1].nOfNeurons; i++){
@@ -203,6 +203,9 @@ void MultilayerPerceptron::backpropagateError(double* target) {
 // ------------------------------
 // Accumulate the changes produced by one pattern and save them in deltaW
 void MultilayerPerceptron::accumulateChange() {
+	
+
+
 	for(int h = 1; h < nOfLayers; h++){
 		for(int j = 0; j < layers[h].nOfNeurons; j++){
 			for(int i = 0; i < layers[h-1].nOfNeurons; i++){
