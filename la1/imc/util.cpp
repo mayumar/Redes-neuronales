@@ -135,7 +135,7 @@ void util::minMaxScalerDataSetInputs(Dataset *dataset, double minAllowed, double
 
     for(int i = 0; i < nOfPatterns; i++){
         for(int j = 0; j < nOfInputs; j++){
-            (dataset->inputs)[i][j] = minMaxScaler((dataset->inputs)[i][j], minAllowed, maxAllowed, *minData, *maxData);
+            (dataset->inputs)[i][j] = minMaxScaler((dataset->inputs)[i][j], minAllowed, maxAllowed, minData[j], maxData[j]);
         }
     }
 }
@@ -162,19 +162,21 @@ double *util::minDatasetInputs(Dataset *dataset)
 {
     int nOfPatterns = dataset->nOfPatterns;
     int nOfInputs = dataset->nOfInputs;
-    double min = (dataset->inputs)[0][0];
+
+    double *minValues = new double[nOfInputs];
+    for(int i = 0; i < nOfInputs; i++){
+        minValues[i] = dataset->inputs[0][i];
+    }
 
     for(int i = 0; i < nOfPatterns; i++){
         for(int j = 0; j < nOfInputs; j++){
-            if((dataset->inputs)[i][j] < min){
-                min = (dataset->inputs)[i][j];
+            if((dataset->inputs)[i][j] < minValues[j]){
+                minValues[j] = (dataset->inputs)[i][j];
             }
         }
     }
 
-    double * min_aux = new double(min);
-
-    return min_aux;
+    return minValues;
 }
 
 // ------------------------------
@@ -183,19 +185,21 @@ double *util::maxDatasetInputs(Dataset *dataset)
 {
     int nOfPatterns = dataset->nOfPatterns;
     int nOfInputs = dataset->nOfInputs;
-    double max = (dataset->inputs)[0][0];
+
+    double * maxValues = new double[nOfInputs];
+    for(int i = 0; i < nOfInputs; i++){
+        maxValues[i] = dataset->inputs[0][i];
+    }
 
     for(int i = 0; i < nOfPatterns; i++){
         for(int j = 0; j < nOfInputs; j++){
-            if((dataset->inputs)[i][j] > max){
-                max = (dataset->inputs)[i][j];
+            if((dataset->inputs)[i][j] > maxValues[j]){
+                maxValues[j] = (dataset->inputs)[i][j];
             }
         }
     }
 
-    double * max_aux = new double(max);
-
-    return max_aux;
+    return maxValues;
 }
 
 // ------------------------------

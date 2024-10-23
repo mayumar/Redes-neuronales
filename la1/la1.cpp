@@ -157,6 +157,23 @@ int main(int argc, char **argv) {
         mlp.eta=eta;
         mlp.mu=mu;
 
+        // Normalize data
+        if(sflag == true){
+            // Normalize inputs
+            double * minInputs = util::minDatasetInputs(trainDataset);
+            double * maxInputs = util::maxDatasetInputs(trainDataset);
+            util::minMaxScalerDataSetInputs(trainDataset, -1.0, 1.0, minInputs, maxInputs);
+            util::minMaxScalerDataSetInputs(testDataset, -1.0, 1.0, minInputs, maxInputs);
+            delete[] minInputs;
+            delete[] maxInputs;
+
+            // Normalize outputs
+            double minOutputs = util::minDatasetOutputs(trainDataset);
+            double maxOutputs = util::maxDatasetOutputs(trainDataset);
+            util::minMaxScalerDataSetOutputs(trainDataset, 0.0, 1.0, minOutputs, maxOutputs);
+            util::minMaxScalerDataSetOutputs(testDataset, 0.0, 1.0, minOutputs, maxOutputs);
+        }
+
         // Seed for random numbers
         int seeds[] = {1,2,3,4,5};
         double *testErrors = new double[5];
