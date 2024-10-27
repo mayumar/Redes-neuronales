@@ -79,6 +79,7 @@ namespace util
     double maxDatasetOutputs(Dataset *dataset);
 
     void plotData(const std::vector<double>& trainingErrors, const std::vector<double>& testErrors);
+    void plotSin(const std::vector<double> dataset_outputs, const std::vector<double> prediction);
 };
 
 #endif /* UTIL_H_ */

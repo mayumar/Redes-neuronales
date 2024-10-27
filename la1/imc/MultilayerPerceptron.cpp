@@ -204,8 +204,6 @@ void MultilayerPerceptron::backpropagateError(double* target) {
 // Accumulate the changes produced by one pattern and save them in deltaW
 void MultilayerPerceptron::accumulateChange() {
 	
-
-
 	for(int h = 1; h < nOfLayers; h++){
 		for(int j = 0; j < layers[h].nOfNeurons; j++){
 			for(int i = 0; i < layers[h-1].nOfNeurons; i++){
@@ -355,9 +353,9 @@ void MultilayerPerceptron::runOnlineBackPropagation(Dataset * trainDataset, Data
 
 		trainOnline(trainDataset);
 		double trainError = test(trainDataset);
-		//double currentTestError = test(pDatosTest);
+		double currentTestError = test(pDatosTest);
 		trainingErrors.push_back(trainError);
-		//testErrors.push_back(currentTestError);
+		testErrors.push_back(currentTestError);
 		if(countTrain==0 || trainError < minTrainError){
 			minTrainError = trainError;
 			copyWeights();
@@ -384,11 +382,14 @@ void MultilayerPerceptron::runOnlineBackPropagation(Dataset * trainDataset, Data
 
 	} while ( countTrain<maxiter );
 
-	plotData(trainingErrors, testErrors);  // Llamar a la función que grafica los datos
+	//plotData(trainingErrors, testErrors);  // Llamar a la función que grafica los datos
 
 	cout << "NETWORK WEIGHTS" << endl;
 	cout << "===============" << endl;
 	printNetwork();
+
+	std::vector<double> dataset_outputs;
+	std::vector<double> predictions;
 
 	cout << "Desired output Vs Obtained output (test)" << endl;
 	cout << "=========================================" << endl;
@@ -399,12 +400,18 @@ void MultilayerPerceptron::runOnlineBackPropagation(Dataset * trainDataset, Data
 		feedInputs(pDatosTest->inputs[i]);
 		forwardPropagate();
 		getOutputs(prediction);
-		for(int j=0; j<pDatosTest->nOfOutputs; j++)
+		for(int j=0; j<pDatosTest->nOfOutputs; j++){
 			cout << pDatosTest->outputs[i][j] << " -- " << prediction[j] << " ";
+			dataset_outputs.push_back(pDatosTest->outputs[i][j]);
+			predictions.push_back(prediction[j]);
+		}
 		cout << endl;
+
 		delete[] prediction;
 
 	}
+
+	//util::plotSin(dataset_outputs, predictions);
 
 	testError = test(pDatosTest);
 	*errorTest=testError;

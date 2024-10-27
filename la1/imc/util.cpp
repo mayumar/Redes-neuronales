@@ -243,17 +243,37 @@ double util::maxDatasetOutputs(Dataset *dataset)
 void util::plotData(const std::vector<double>& trainingErrors, const std::vector<double>& testErrors) {
     std::ofstream dataFile("errors_data.dat");
     for (size_t i = 0; i < trainingErrors.size(); ++i) {
-        //dataFile << i << " " << trainingErrors[i] << " " << testErrors[i] << "\n";
-        dataFile << i << " " << trainingErrors[i] << "\n";
+        dataFile << i << " " << trainingErrors[i] << " " << testErrors[i] << "\n";
+        //dataFile << i << " " << trainingErrors[i] << "\n";
     }
     dataFile.close();
 
     // Enviar comandos a gnuplot
     FILE *gnuplotPipe = popen("gnuplot -persistent", "w");
-    //fprintf(gnuplotPipe, "set title 'Training and Test Error'\n");
+    fprintf(gnuplotPipe, "set title 'Training and Test Error'\n");
     fprintf(gnuplotPipe, "set xlabel 'Iterations'\n");
     fprintf(gnuplotPipe, "set ylabel 'Error'\n");
-    //fprintf(gnuplotPipe, "plot 'errors_data.dat' using 1:2 title 'Training Error' with lines, 'errors_data.dat' using 1:3 title 'Test Error' with lines\n");
-    fprintf(gnuplotPipe, "plot 'errors_data.dat' using 1:2 title 'Training Error' with lines\n");
+    fprintf(gnuplotPipe, "plot 'errors_data.dat' using 1:2 title 'Training Error' with lines, 'errors_data.dat' using 1:3 title 'Test Error' with lines\n");
+    //fprintf(gnuplotPipe, "plot 'errors_data.dat' using 1:2 title 'Training Error' with lines\n");
     fflush(gnuplotPipe);
+}
+
+void util::plotSin(const std::vector<double> dataset_outputs, const std::vector<double> prediction){
+    ofstream sinFile("sin_data.dat");
+    for (int i = 0; i < dataset_outputs.size(); ++i) {
+        sinFile << i << "\t" << dataset_outputs[i] << "\t" << prediction[i] << endl;
+    }
+    sinFile.close();
+
+    // Llamada a Gnuplot para graficar el seno
+    FILE *gnuplotPipeSin = popen("gnuplot -persistent", "w");
+    if (gnuplotPipeSin) {
+        fprintf(gnuplotPipeSin, "set title 'Sin Function'\n");
+        fprintf(gnuplotPipeSin, "set xlabel 'X'\n");
+        fprintf(gnuplotPipeSin, "set ylabel 'sin(X)'\n");
+        fprintf(gnuplotPipeSin, "plot 'sin_data.dat' using 1:2 with lines title 'Desired Output', \\\n");
+        fprintf(gnuplotPipeSin, "'sin_data.dat' using 1:3 with lines title 'Prediction'\n");
+        fflush(gnuplotPipeSin);
+        pclose(gnuplotPipeSin);
+    }
 }
