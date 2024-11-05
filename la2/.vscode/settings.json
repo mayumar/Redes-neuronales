@@ -1,0 +1,10 @@
+{
+  "files.associations": {
+    "limits": "cpp",
+    "iostream": "cpp",
+    "fstream": "cpp",
+    "ostream": "cpp",
+    "new": "cpp"
+  },
+  "makefile.configureOnOpen": true
+}
