@@ -1,6 +1,6 @@
 # Adapted from Job Vranish (https://spin.atomicobject.com/2016/08/26/makefile-c-projects/)
 TARGET_EXEC := la1
-DEFAULT_RUN_CONFIG := -t ./dat/train_xor.dat -T ./dat/test_xor.dat -i 1000 -l 1 -h 2 -e 0.1 -m 0.9
+DEFAULT_RUN_CONFIG := -t ./dat/train_xor.dat -T ./dat/test_xor.dat -i 1000 -l 1 -h 16 -e 0.7 -m 1 -f 1 -s
 
 BUILD_DIR := ./bin
 SRC_DIRS := .
