@@ -8,6 +8,7 @@
 #define _MULTILAYERPERCEPTRON_H_
 
 #include "util.h"
+#include <vector>
 using namespace util;
 
 namespace imc{

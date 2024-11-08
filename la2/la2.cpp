@@ -121,6 +121,10 @@ int main(int argc, char **argv) {
         if(mflag)
             mlp.mu = atof(mvalue);
 
+        mlp.online = oflag;
+
+        mlp.outputFunction = sflag;
+
     	// Type of error considered
     	int error=0;
         if(fflag)
