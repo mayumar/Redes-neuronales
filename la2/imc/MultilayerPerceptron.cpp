@@ -199,12 +199,13 @@ double MultilayerPerceptron::obtainError(double* target, int errorFunction) {
 			error += (difference*difference);
 		}
 
-		error /= layers[nOfLayers-1].nOfNeurons;
-		
 	}else if(errorFunction == 1){ // Cross Entropy
-
+		for(int k = 0; k < layers[nOfLayers-1].nOfNeurons; k++){
+			error += target[k] * log(layers[nOfLayers-1].neurons[k].out);
+		}
 	}
 
+	error /= layers[nOfLayers-1].nOfNeurons;
 	return error;
 }
 
@@ -357,21 +358,30 @@ void MultilayerPerceptron::train(Dataset* trainDataset, int errorFunction) {
 // Test the network with a dataset and return the error
 // errorFunction=1 => Cross Entropy // errorFunction=0 => MSE
 double MultilayerPerceptron::test(Dataset* dataset, int errorFunction) {
-	/* online
-	double mse = 0.0, difference;
+	double error = 0.0;
 
-	for(int i = 0; i < testDataset->nOfPatterns; i++){
-		feedInputs(testDataset->inputs[i]);
-		forwardPropagate();
-		for(int j = 0; j < testDataset->nOfOutputs; j++){
-			difference = testDataset->outputs[i][j] - layers[nOfLayers-1].neurons[j].out;
-			mse += difference*difference;
+	if(errorFunction == 0){
+		for(int p = 0; p < dataset->nOfPatterns; p++){
+			int mse = 0.0;
+			for(int o = 0; o < dataset->nOfOutputs; o++){
+				int difference = dataset->outputs[p][o] - layers[nOfLayers-1].neurons[o].out;
+				mse += difference * difference;
+			}
+			error += mse / dataset->nOfOutputs;
 		}
+		error /= dataset->nOfPatterns;
+	}else if(errorFunction == 1){
+		for(int p = 0; p < dataset->nOfPatterns; p++){
+			int crossentropy = 0.0;
+			for(int o = 0; o < dataset->nOfOutputs; o++){
+				crossentropy += dataset->outputs[p][o] * log(layers[nOfLayers-1].neurons[o].out);
+			}
+			error += crossentropy / dataset->nOfOutputs;
+		}
+		error /= -dataset->nOfPatterns;
 	}
 	
-	double out = mse/testDataset->nOfPatterns;
-	return out;
-	*/
+	return error;
 }
 
 
