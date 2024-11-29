@@ -1,6 +1,7 @@
 # TODO: Load the necessary libraries
 
 from rbf import RBFNN
+import click
 
 
 @click.command()
