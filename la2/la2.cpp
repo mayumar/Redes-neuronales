@@ -222,6 +222,29 @@ int main(int argc, char **argv) {
 
         // Obtain training and test averages and standard deviations
 
+        for(int i = 0; i < 5; i++) {
+            trainAverageError += trainErrors[i];
+            testAverageError += testErrors[i];
+            trainAverageCCR += trainCCRs[i];
+            testAverageCCR += testCCRs[i];
+        }
+        trainAverageError /= 5;
+        testAverageError /= 5;
+        trainAverageCCR /= 5;
+        testAverageCCR /= 5;
+
+        for(int i = 0; i < 5; i++) {
+            trainStdError += pow(trainErrors[i] - trainAverageError, 2);
+            testStdError += pow(testErrors[i] - testAverageError, 2);
+            trainStdCCR += pow(trainCCRs[i] - trainAverageCCR, 2);
+            testStdCCR += pow(testCCRs[i] - testAverageCCR, 2);
+        }
+        trainStdError = sqrt(trainStdError / 5);
+        testStdError = sqrt(testStdError / 5);
+        trainStdCCR = sqrt(trainStdCCR / 5);
+        testStdCCR = sqrt(testStdCCR / 5);
+
+
 		cout << "WE HAVE FINISHED WITH ALL THE SEEDS" << endl;
 
 		cout << "FINAL REPORT" << endl;

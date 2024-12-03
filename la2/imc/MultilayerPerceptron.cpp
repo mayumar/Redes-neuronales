@@ -360,26 +360,43 @@ void MultilayerPerceptron::train(Dataset* trainDataset, int errorFunction) {
 double MultilayerPerceptron::test(Dataset* dataset, int errorFunction) {
 	double error = 0.0;
 
-	if(errorFunction == 0){
-		for(int p = 0; p < dataset->nOfPatterns; p++){
-			int mse = 0.0;
-			for(int o = 0; o < dataset->nOfOutputs; o++){
-				int difference = dataset->outputs[p][o] - layers[nOfLayers-1].neurons[o].out;
-				mse += difference * difference;
-			}
-			error += mse / dataset->nOfOutputs;
-		}
-		error /= dataset->nOfPatterns;
-	}else if(errorFunction == 1){
-		for(int p = 0; p < dataset->nOfPatterns; p++){
-			int crossentropy = 0.0;
-			for(int o = 0; o < dataset->nOfOutputs; o++){
-				crossentropy += dataset->outputs[p][o] * log(layers[nOfLayers-1].neurons[o].out);
-			}
-			error += crossentropy / dataset->nOfOutputs;
-		}
-		error /= -dataset->nOfPatterns;
+	for(int p = 0; p < dataset->nOfPatterns; p++){
+		feedInputs(dataset->inputs[p]);
+		forwardPropagate();
+
+		error += obtainError(dataset->inputs[p], errorFunction);
 	}
+
+	if(errorFunction == 0)
+		error /= dataset->nOfPatterns;
+	else
+		error = -1 * (error /dataset->nOfPatterns);
+
+	// if(errorFunction == 0){
+	// 	for(int p = 0; p < dataset->nOfPatterns; p++){
+	// 		feedInputs(dataset->inputs[p]);
+	// 		forwardPropagate();
+	// 		int mse = 0.0;
+	// 		for(int o = 0; o < dataset->nOfOutputs; o++){
+	// 			int difference = dataset->outputs[p][o] - layers[nOfLayers-1].neurons[o].out;
+	// 			mse += difference * difference;
+	// 		}
+	// 		error += mse / dataset->nOfOutputs;
+	// 	}
+	// 	error /= dataset->nOfPatterns;
+	// }else if(errorFunction == 1){
+	// 	for(int p = 0; p < dataset->nOfPatterns; p++){
+	// 		feedInputs(dataset->inputs[p]);
+	// 		forwardPropagate();
+	// 		int crossentropy = 0.0;
+	// 		for(int o = 0; o < dataset->nOfOutputs; o++){
+	// 			crossentropy += dataset->outputs[p][o] * log(layers[nOfLayers-1].neurons[o].out);
+	// 		}
+	// 		error += crossentropy / dataset->nOfOutputs;
+	// 	}
+	// 	error /= dataset->nOfPatterns;
+	// 	error *= -1;
+	// }
 	
 	return error;
 }
@@ -388,21 +405,40 @@ double MultilayerPerceptron::test(Dataset* dataset, int errorFunction) {
 // ------------------------------
 // Test the network with a dataset and return the CCR
 double MultilayerPerceptron::testClassification(Dataset* dataset) {
-	/* online
-	double mse = 0.0, difference;
+	double ccr = 0.0;
+	double *output = new double[layers[nOfLayers - 1].nOfNeurons];
 
-	for(int i = 0; i < testDataset->nOfPatterns; i++){
-		feedInputs(testDataset->inputs[i]);
+	for(int i = 0; i < dataset->nOfPatterns; i++){
+		feedInputs(dataset->inputs[i]);
 		forwardPropagate();
-		for(int j = 0; j < testDataset->nOfOutputs; j++){
-			difference = testDataset->outputs[i][j] - layers[nOfLayers-1].neurons[j].out;
-			mse += difference*difference;
+		getOutputs(output);
+
+		double maximo_esperado = dataset->outputs[i][0];
+		int clase_esperada = 0;
+		double maximo_obtenido = output[0];
+		int clase_obtenida = 0;
+		for(int j = 0; j < dataset->nOfOutputs; j++){
+			if(maximo_esperado < dataset->outputs[i][j]){
+				maximo_esperado = dataset->outputs[i][j];
+				clase_esperada = j;
+			}
+
+			if(maximo_obtenido < output[j]){
+				maximo_obtenido = output[j];
+				clase_obtenida = j;
+			}
 		}
+
+		ccr += (clase_esperada == clase_obtenida);
+		cout << "clase esperada == clase obtenida: " << (clase_esperada == clase_obtenida) << ", ccr: " << ccr << endl;
 	}
+
+	delete[] output;
+
+	cout << "ccr: " << ccr << ", 1/nOfPatterns: " << 1.0/dataset->nOfPatterns << endl;
+	ccr = 100 * (1.0/dataset->nOfPatterns) * ccr;
 	
-	double out = mse/testDataset->nOfPatterns;
-	return out;
-	*/
+	return ccr;
 }
 
 
