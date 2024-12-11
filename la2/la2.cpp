@@ -150,15 +150,6 @@ int main(int argc, char **argv) {
         else
             testDataset = util::readData(tvalue);
 
-        // Initialize topology vector
-
-        //int *topology = new int[layers+2];
-        //topology[0] = trainDataset->nOfInputs;
-        //for(int i=1; i<(layers+2-1); i++)
-        //    topology[i] = neurons;
-        //topology[layers+2-1] = trainDataset->nOfOutputs;
-        //mlp.initialize(layers+2,topology);
-
         int layers = 1;
         if(lflag)
             layers = atoi(lvalue);
