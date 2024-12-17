@@ -1,10 +1,10 @@
 # Adapted from Job Vranish (https://spin.atomicobject.com/2016/08/26/makefile-c-projects/)
 TARGET_EXEC := la2
-# DEFAULT_RUN_CONFIG := -t ./dat/train_xor.dat -T ./dat/test_xor.dat -i 1000 -l 1 -h 16 -e 0.7 -m 1 -f 1 -s
+DEFAULT_RUN_CONFIG := -t ./dat/train_xor.dat -T ./dat/test_xor.dat -i 1000 -l 1 -h 16 -e 0.7 -m 1 -f 1 -s
 # DEFAULT_RUN_CONFIG := -t ./dat/train_nomnist.dat -T ./dat/test_nomnist.dat -i 500 -l 1 -h 4 -f 1 -s
 # DEFAULT_RUN_CONFIG := -t ./dat/train_nomnist.dat -T ./dat/test_nomnist.dat -i 500 -l 1 -h 4 -e 1 -m 2 -f 1 -s
 # DEFAULT_RUN_CONFIG := -t ./dat/train_nomnist.dat -T ./dat/test_nomnist.dat -i 500 -l 1 -h 4 -e 1 -m 2 -f 0 -s
-DEFAULT_RUN_CONFIG := -t ./dat/train_nomnist.dat -T ./dat/test_nomnist.dat -i 500 -l 1 -h 8 -e 0.1 -m 2 -f 1 -s -o
+# DEFAULT_RUN_CONFIG := -t ./dat/train_nomnist.dat -T ./dat/test_nomnist.dat -i 500 -l 1 -h 8 -e 0.1 -m 2 -f 1 -s -o
 # DEFAULT_RUN_CONFIG := -t ./dat/train_compas.dat -T ./dat/test_compas.dat
 
 BUILD_DIR := ./bin

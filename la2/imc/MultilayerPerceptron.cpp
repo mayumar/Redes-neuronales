@@ -157,7 +157,10 @@ void MultilayerPerceptron::forwardPropagate() {
 		for(int j = 0; j < layers[h].nOfNeurons; j++){
 			net = layers[h].neurons[j].w[layers[h-1].nOfNeurons];
 			for(int i = 0; i < layers[h-1].nOfNeurons; i++){
-				net += layers[h].neurons[j].w[i] * layers[h-1].neurons[i].out;
+				if((h == nOfLayers-1) && (j == layers[h].nOfNeurons-1))
+					net = 0;
+				else
+					net += layers[h].neurons[j].w[i] * layers[h-1].neurons[i].out;
 			}
 
 			if((h == (nOfLayers-1)) && (outputFunction == 1)){
@@ -205,7 +208,7 @@ double MultilayerPerceptron::obtainError(double* target, int errorFunction) {
 void MultilayerPerceptron::backpropagateError(double* target, int errorFunction) {
 
 	int lastLayer = nOfLayers-1;
-	for(int j = 0; j < layers[lastLayer].nOfNeurons; j++){
+	for(int j = 0; j < layers[lastLayer].nOfNeurons-1; j++){
 		double llout = layers[lastLayer].neurons[j].out;
 		layers[lastLayer].neurons[j].delta = 0.0;
 
@@ -230,7 +233,8 @@ void MultilayerPerceptron::backpropagateError(double* target, int errorFunction)
 		for(int j = 0; j < layers[h].nOfNeurons; j++){
 			double sum = 0.0;
 			for(int i = 0; i < layers[h+1].nOfNeurons; i++){
-				sum += layers[h+1].neurons[i].w[j] * layers[h+1].neurons[i].delta;
+				if((h != lastLayer-1) || (i != layers[h+1].nOfNeurons-1))
+					sum += layers[h+1].neurons[i].w[j] * layers[h+1].neurons[i].delta;
 			}
 			layers[h].neurons[j].delta = sum * layers[h].neurons[j].out * (1 - layers[h].neurons[j].out);
 		}
