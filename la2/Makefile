@@ -30,13 +30,22 @@ OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 # As an example, ./build/hello.cpp.o turns into ./build/hello.cpp.d
 DEPS := $(OBJS:.o=.d)
 
+# Paths to OpenCV
+OPENCV_DIR := /usr/include/opencv4
+OPENCV_INCLUDE_DIR := $(OPENCV_DIR)
+OPENCV_LIB_DIR := /usr/lib/x86_64-linux-gnu
+
 # Include flags
-INC_FLAGS := -I.
+# INC_FLAGS := -I.
+INC_FLAGS := -I$(OPENCV_INCLUDE_DIR) -I.
 # Removed automatic includes:
 # # Every folder in ./src will need to be passed to GCC so that it can find header files
 # INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 # Add a prefix to INC_DIRS. So moduleA would become -ImoduleA. GCC understands this -I flag
 # INC_FLAGS := $(addprefix -I,$(INC_DIRS))
+
+# Linking flags
+LDFLAGS := -L$(OPENCV_LIB_DIR) -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs -lopencv_videoio
 
 # The -MMD and -MP flags together generate Makefiles for us!
 # These files will have .d instead of .o as the output.
