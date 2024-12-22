@@ -129,7 +129,7 @@ public:
 	bool readWeights(const char * fileName);
 
     void computeConfusionMatrix(Dataset * testDataset, int** confusionMatrix, double ccrTest);
-	void visualizeErrors(Dataset * testDataset, const vector<string>& labels, const vector<cv::Mat>& images);
+	void visualizeErrors(Dataset * testDataset);
 };
 
 };

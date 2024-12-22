@@ -520,6 +520,9 @@ void MultilayerPerceptron::runBackPropagation(Dataset * trainDataset, Dataset * 
 	*ccrTest = testClassification(testDataset);
 	*ccrTrain = testClassification(trainDataset);
 
+	// Visualizar los errores
+	visualizeErrors(testDataset);
+
 	// Crear y calcular la matriz de confusión
 	int nClases = testDataset->nOfOutputs;
 	int** confusionMatrix = new int*[nClases];
@@ -682,4 +685,44 @@ void MultilayerPerceptron::computeConfusionMatrix(Dataset* testDataset, int** co
 
 }
 
+void MultilayerPerceptron::visualizeErrors(Dataset * testDataset){
+	int nClases = layers[nOfLayers-1].nOfNeurons;
 
+	for(int p = 0; p < testDataset->nOfPatterns; p++){
+		feedInputs(testDataset->inputs[p]);
+		forwardPropagate();
+
+		// Obtener la clase predicha
+		int predicted = 0;
+		double maxOut = layers[nOfLayers-1].neurons[0].out;
+
+		for(int i = 1; i < nClases; i++){
+			if(layers[nOfLayers-1].neurons[i].out > maxOut){
+				maxOut = layers[nOfLayers-1].neurons[i].out;
+				predicted = i;
+			}
+		}
+
+		// Obtener la clase real
+		int actual = 0;
+		double maxActual = testDataset->outputs[p][0];
+
+		for(int i = 1; i < nClases; i++){
+			if(testDataset->outputs[p][i] > maxActual){
+				maxActual = testDataset->outputs[p][i];
+				actual = i;
+			}
+		}
+
+		// Si hay error, mostrar imagen y etiquetas
+		if(predicted != actual){
+			string imagePath = "test_img/" + to_string(p) + ".png";
+			cv::Mat image = cv::imread(imagePath, cv::IMREAD_GRAYSCALE);
+			char predicted_label = 'A' + predicted;
+			char actual_label = 'A' + actual;
+			cout << "Error en patrón " << p << ": Predicho = " << predicted_label << ", Real = " << actual_label << endl;
+			cv::imshow("Error Visualizado", image);
+			cv::waitKey(0); // Espera por una tecla para continuar
+		}
+	}
+}
