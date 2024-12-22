@@ -454,6 +454,8 @@ void MultilayerPerceptron::runBackPropagation(Dataset * trainDataset, Dataset * 
 	int iterWithoutImproving = 0;
 	nOfTrainingPatterns = trainDataset->nOfPatterns;
 
+	vector<double> trainingccrs;
+	vector<double> testccrs;
 
 	// Learning
 	do {
@@ -461,6 +463,11 @@ void MultilayerPerceptron::runBackPropagation(Dataset * trainDataset, Dataset * 
 		train(trainDataset,errorFunction);
 
 		double trainError = test(trainDataset,errorFunction);
+		double trainccr = testClassification(trainDataset);
+		double currentTestccr = testClassification(testDataset);
+		trainingccrs.push_back(trainccr);
+		testccrs.push_back(currentTestccr);
+
 		if(countTrain==0 || trainError < minTrainError){
 			minTrainError = trainError;
 			copyWeights();
@@ -482,6 +489,8 @@ void MultilayerPerceptron::runBackPropagation(Dataset * trainDataset, Dataset * 
 		cout << "Iteration " << countTrain << "\t Training error: " << trainError << endl;
 
 	} while ( countTrain<maxiter );
+
+	// plotData(trainingccrs, testccrs);  // Llamar a la función que grafica los datos
 
 	if ( iterWithoutImproving!=50)
 		restoreWeights();
@@ -511,6 +520,20 @@ void MultilayerPerceptron::runBackPropagation(Dataset * trainDataset, Dataset * 
 	*ccrTest = testClassification(testDataset);
 	*ccrTrain = testClassification(trainDataset);
 
+	// Crear y calcular la matriz de confusión
+	int nClases = testDataset->nOfOutputs;
+	int** confusionMatrix = new int*[nClases];
+	for(int i = 0; i < nClases; i++){
+		confusionMatrix[i] = new int[nClases]();
+	}
+
+	computeConfusionMatrix(testDataset, confusionMatrix, testClassification(testDataset));
+
+	// Liberar la memoria de la matriz de confusion
+	for(int i = 0; i < nClases; i++){
+		delete[] confusionMatrix[i];
+	}
+	delete[] confusionMatrix;
 }
 
 // -------------------------
@@ -588,3 +611,75 @@ bool MultilayerPerceptron::readWeights(const char * fileName)
 
 	return true;
 }
+
+void MultilayerPerceptron::computeConfusionMatrix(Dataset* testDataset, int** confusionMatrix, double ccrTest){
+    int nClases = layers[nOfLayers - 1].nOfNeurons;
+
+	// Inicializar matriz de confusión
+	for(int i = 0; i < nClases; i++)
+		for(int j = 0; j < nClases; j++)
+			confusionMatrix[i][j] = 0;
+	
+
+	for(int p = 0; p < testDataset->nOfPatterns; p++){
+		// Propagar entrada
+		feedInputs(testDataset->inputs[p]);
+		forwardPropagate();
+
+		// Obtener predicción y etiqueta real
+		int predicted = 0;
+		double maxOut = layers[nOfLayers-1].neurons[0].out;
+
+		for(int i = 1; i < nClases; i++){
+			if(layers[nOfLayers-1].neurons[i].out > maxOut){
+				maxOut = layers[nOfLayers-1].neurons[i].out;
+				predicted = i;
+			}
+		}
+
+		int actual = 0;
+		double maxActual = testDataset->outputs[p][0];
+
+		for(int i = 1; i < nClases; i++){
+			if(testDataset->outputs[p][i] > maxActual){
+				maxActual = testDataset->outputs[p][i];
+				actual = i;
+			}
+		}
+
+		confusionMatrix[actual][predicted]++;
+	}
+
+	// Guardar la matriz de confusión en un archivo
+	std::ofstream file("confusion_matrix.txt", ios::app);
+
+	if(file.is_open()){
+
+		file << "Confusion Matrix (Test Dataset):\n";
+
+		file << "     ";
+		for(char label = 'A'; label < 'A' + nClases; ++label){
+			file << label << " ";
+		}
+		file << "\n";
+
+		for(int i = 0; i < nClases; i++){
+			file << static_cast<char>('A' + i) << " | ";
+			for(int j = 0; j < nClases; j++){
+				file << confusionMatrix[i][j] << " ";
+			}
+			file << "\n";
+		}
+
+		file << "CCR de la seed: " << ccrTest << "\n";
+
+		file.close();
+		cout << "Confusion matrix saved to 'confusion_matrix.txt'" << endl;
+
+	}else{
+		cerr << "Error: Unable to open file to save confusion matrix" << endl;
+	}
+
+}
+
+

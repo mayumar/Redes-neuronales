@@ -8,7 +8,9 @@
 #ifndef UTIL_H_
 #define UTIL_H_
 #include <cstdlib> // To establish the seed srand() and generate pseudorandom numbers rand()
+#include <vector>
 
+using namespace std;
 namespace util
 {
 
@@ -58,6 +60,8 @@ namespace util
 
     // Get the maximum value of the dataset outputs
     double maxDatasetOutputs(Dataset *dataset);
+
+    void plotData(const vector<double>& trainingErrors, const vector<double>& testErrors);
 };
 
 #endif /* UTIL_H_ */

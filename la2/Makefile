@@ -9,11 +9,11 @@ TARGET_EXEC := la2
 
 # Mejor arquitectura de la p1
 # DEFAULT_RUN_CONFIG := -t ./dat/train_xor.dat -T ./dat/test_xor.dat -i 1000 -l 2 -h 100 -e 0.7 -m 1 -f 1 -s
-# DEFAULT_RUN_CONFIG := -t ./dat/train_xor.dat -T ./dat/test_xor.dat -i 1000 -l 2 -h 100 -e 0.7 -m 1 -f 1 -s -o
+# DEFAULT_RUN_CONFIG := -t ./dat/train_xor.dat -T ./dat/test_xor.dat -i 1000 -l 2 -h 100 -e 0.7 -m 1 -f 1 -s
 
-# DEFAULT_RUN_CONFIG := -t ./dat/train_compas.dat -T ./dat/test_compas.dat -i 1000 -l 2 -h 8 -e 0.7 -m 1 -f 1 -s -o
+# DEFAULT_RUN_CONFIG := -t ./dat/train_compas.dat -T ./dat/test_compas.dat -i 1000 -l 2 -h 8 -e 0.7 -m 1 -f 1 -s
 
-DEFAULT_RUN_CONFIG := -t ./dat/train_nomnist.dat -T ./dat/test_nomnist.dat -i 500 -l 1 -h 8 -e 0.7 -m 1 -f 0 -s -o
+DEFAULT_RUN_CONFIG := -t ./dat/train_nomnist.dat -T ./dat/test_nomnist.dat -i 500 -l 1 -h 8 -e 0.7 -m 1 -f 1 -s
 
 BUILD_DIR := ./bin
 SRC_DIRS := .
