@@ -1,10 +1,17 @@
 # TODO: Load the necessary libraries
+import numpy as np
 
 
 class RBFNN(BaseEstimator):
     def __init__(
         self,
         # TODO: Add the necessary parameters and their types
+        classification: bool,
+        ratio_rbf: float,
+        l2: bool,
+        eta: float,
+        logisticcv: bool,
+        random_state: int,
     ) -> None:
         """
         Constructor of the class
@@ -29,6 +36,17 @@ class RBFNN(BaseEstimator):
 
         # TODO: Complete the code of the constructor. Add the parameters to self.
         self.is_fitted = False
+        self.classification = classification
+        self.ration_rbf = ratio_rbf
+        self.l2 = l2
+        self.eta = eta
+        self.logisticcv = logisticcv
+        self.random_state = random_state
+        self.num_rbf = None
+        self.centroids = None
+        self.radii = None
+        self.coefficients = None
+        self.logreg = None
 
     def fit(self, X: np.array, y: np.array):
         """

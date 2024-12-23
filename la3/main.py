@@ -2,6 +2,10 @@
 
 from rbf import RBFNN
 import click
+import numpy as np
+import pandas as pd
+import os
+from sklearn.metrics import mean_squared_error, accuracy_score
 
 
 @click.command()
@@ -14,6 +18,68 @@ import click
     type=str,
 )
 # TODO: Capture the necessary parameters
+@click.option(
+    "--standarize",
+    "-s",
+    is_flag=True,
+    help="Standardize input variables.",
+)
+@click.option(
+    "--classification",
+    "-c",
+    is_flag=True,
+    help="Use classification instead of regression.",
+)
+@click.option(
+    "--ratio rbf",
+    "-r",
+    default=0.1,
+    show_default=True,
+    help="Ratio of RBFs with respect to the total number of patterns.",
+    type=float,
+)
+@click.option(
+    "--l2",
+    "-l",
+    is_flag=True,
+    help="Use L2 regularization for logistic regression.",
+)
+@click.option(
+    "--eta",
+    "-e",
+    default=0.01,
+    show_default=True,
+    help="Value of the regularization factor for logistic regression.",
+    type=float,
+)
+@click.option(
+    "--fairness",
+    "-f",
+    is_flag=True,
+    help="Calculate fairness metrics.",
+)
+@click.option(
+    "--outputs",
+    "-o",
+    default=1,
+    show_default=True,
+    help="Number of output columns in the dataset (always at the end).",
+    type=int,
+)
+@click.option(
+    "--logisticcv",
+    "-v",
+    is_flag=True,
+    help="Use LogisticRegressionCV.",
+)
+@click.option(
+    "--seeds",
+    "-n",
+    default=5,
+    show_default=True,
+    help="Number of seeds to use.",
+    type=int,
+)
 @click.option(
     "--model_filename",
     "-m",
@@ -88,6 +154,29 @@ def main(
 
     # TODO: Complete with at least 10 checks to ensure that the parameters are correct
 
+    # Validaciones de parámetros
+    if not 0 < ratio_rbf <= 1:
+        raise ValueError("The ratio_rbf parameter must be between 0 and 1.")
+
+    if seeds <= 0:
+        raise ValueError("The number of seeds (--seeds) must be greater than 0.")
+
+    if fairness and not classification:
+        raise ValueError("Fairness evaluation is only applicable to classification problems.")
+
+    if pred is not None and not model_filename:
+        raise ValueError("Model filename (-m) must be specified for prediction mode.")
+
+    if pred is not None and (pred < 0 or pred >= seeds):
+        raise ValueError("Pred seed must be within the range of 0 to (seeds - 1).")
+
+    if eta <= 0:
+        raise ValueError("The eta parameter (--eta) must be greater than 0.")
+
+    if not dataset_filename.endswith(".csv"):
+        raise ValueError("The dataset file must be a CSV.")
+
+
     results = []
 
     seeds_list = range(seeds)
@@ -101,6 +190,7 @@ def main(
         np.random.seed(random_state)
 
         # TODO: Read the data
+        data = read_data(dataset_filename, standarize, random_state, classification, fairness, pred)
 
         if not fairness and pred is None:
             X_train, y_train, X_test, y_test = data
@@ -118,6 +208,7 @@ def main(
 
         if pred is None:  # Train the model
             # TODO: Create the object
+
             # TODO: Train the model
 
             if model_filename:
