@@ -1,3 +1,7 @@
 la4
 test_img
 train_img
+imgs
+confusion_matrix.txt
+errors_data.dat
+bin

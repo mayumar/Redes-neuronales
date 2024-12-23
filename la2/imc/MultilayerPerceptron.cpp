@@ -521,22 +521,22 @@ void MultilayerPerceptron::runBackPropagation(Dataset * trainDataset, Dataset * 
 	*ccrTrain = testClassification(trainDataset);
 
 	// Visualizar los errores
-	visualizeErrors(testDataset);
+	// visualizeErrors(testDataset);
 
-	// Crear y calcular la matriz de confusión
-	int nClases = testDataset->nOfOutputs;
-	int** confusionMatrix = new int*[nClases];
-	for(int i = 0; i < nClases; i++){
-		confusionMatrix[i] = new int[nClases]();
-	}
+	// // Crear y calcular la matriz de confusión
+	// int nClases = testDataset->nOfOutputs;
+	// int** confusionMatrix = new int*[nClases];
+	// for(int i = 0; i < nClases; i++){
+	// 	confusionMatrix[i] = new int[nClases]();
+	// }
 
-	computeConfusionMatrix(testDataset, confusionMatrix, testClassification(testDataset));
+	// computeConfusionMatrix(testDataset, confusionMatrix, testClassification(testDataset));
 
-	// Liberar la memoria de la matriz de confusion
-	for(int i = 0; i < nClases; i++){
-		delete[] confusionMatrix[i];
-	}
-	delete[] confusionMatrix;
+	// // Liberar la memoria de la matriz de confusion
+	// for(int i = 0; i < nClases; i++){
+	// 	delete[] confusionMatrix[i];
+	// }
+	// delete[] confusionMatrix;
 }
 
 // -------------------------

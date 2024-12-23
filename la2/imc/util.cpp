@@ -250,10 +250,10 @@ void util::plotData(const vector<double>& trainingErrors, const vector<double>& 
 
     // Enviar comandos a gnuplot
     FILE *gnuplotPipe = popen("gnuplot -persistent", "w");
-    fprintf(gnuplotPipe, "set title 'Training and Test Error'\n");
+    fprintf(gnuplotPipe, "set title 'Training and Test CCR'\n");
     fprintf(gnuplotPipe, "set xlabel 'Iterations'\n");
-    fprintf(gnuplotPipe, "set ylabel 'Error'\n");
-    fprintf(gnuplotPipe, "plot 'errors_data.dat' using 1:2 title 'Training Error' with lines, 'errors_data.dat' using 1:3 title 'Test Error' with lines\n");
+    fprintf(gnuplotPipe, "set ylabel 'CCR'\n");
+    fprintf(gnuplotPipe, "plot 'errors_data.dat' using 1:2 title 'Training CCR' with lines, 'errors_data.dat' using 1:3 title 'Test CCR' with lines\n");
     //fprintf(gnuplotPipe, "plot 'errors_data.dat' using 1:2 title 'Training Error' with lines\n");
     fflush(gnuplotPipe);
 }
