@@ -1,11 +1,15 @@
-# TODO: Load the necessary libraries
 import numpy as np
+from sklearn.cluster import KMeans
+from scipy.spatial.distance import cdist, pdist, squareform
+from sklearn.base import BaseEstimator
+from sklearn.metrics import accuracy_score, mean_squared_error
+from sklearn.linear_model import LogisticRegression, LogisticRegressionCV
+from typing import Tuple, Union
 
 
 class RBFNN(BaseEstimator):
     def __init__(
         self,
-        # TODO: Add the necessary parameters and their types
         classification: bool,
         ratio_rbf: float,
         l2: bool,
@@ -34,7 +38,6 @@ class RBFNN(BaseEstimator):
             Seed for the random number generator
         """
 
-        # TODO: Complete the code of the constructor. Add the parameters to self.
         self.is_fitted = False
         self.classification = classification
         self.ration_rbf = ratio_rbf
@@ -68,23 +71,30 @@ class RBFNN(BaseEstimator):
         np.random.seed(self.random_state)
         self.num_rbf = int(self.ratio_rbf * y.shape[0])
         print(f"Number of RBFs used: {self.num_rbf}")
+
         # 1. Init centroids
-        # TODO: Call the appropriate function
+        if self.classification:
+            self.centroids = self._init_centroids_classification(X, y)
+        else:
+            self.centroids = X[np.random.choice(X.shape[0], self.num_rbf, replace=False)]
 
         # 2. clustering
-        # TODO: Call the appropriate function
+        kmeans = self._clustering(X)
+        self.centroids = kmeans.cluster_centers_
 
         # 3. Calculate radii
-        # TODO: Call the appropriate function
+        self.radii = self._calculate_radii()
 
         # 4. R matrix
-        # TODO: Call the appropriate function
+        distances = cdist(X, self.centroids)
+        r_matrix = self._calculate_r_matrix(distances)
 
         # 5. Calculate betas
         if self.classification:
-            # TODO: Call the appropriate function
+            self.logreg = self._logreg_classification()
+            self.logreg.fit(r_matrix, y)
         else:
-            # TODO: Call the appropriate function
+            self.coefficients = self._invert_matrix_regression(r_matrix, y)
 
         self.is_fitted = True
 
@@ -109,15 +119,16 @@ class RBFNN(BaseEstimator):
             raise ValueError("Model is not fitted yet.")
 
         # 2. clustering
-        # TODO: Call the appropriate function
+        distances = cdist(X, self.centroids)
+        r_matrix = self._calculate_r_matrix(distances)
 
         # 4. radii for test set
-        # TODO: Call the appropriate function
+        self.radii = self._calculate_radii(self.centroids)
 
         if self.classification:
-            # TODO: Call the appropriate function
+            predictions = self.logreg.predict(r_matrix)
         else:
-            # TODO: Call the appropriate function 
+            predictions = r_matrix @ self.coefficients
 
         return predictions
 
@@ -139,11 +150,13 @@ class RBFNN(BaseEstimator):
             accuracy or mean squared error depending on the classification
             parameter
         """
+        predictions = self.predict(X)
+
         if self.classification:
-            # TODO: Return the appropriate values
+            return accuracy_score(y, predictions)
 
         else:
-            # TODO: Return the appropriate values
+            return mean_squared_error(y, predictions)
 
     def _init_centroids_classification(
         self, X_train: np.array, y_train: np.array
@@ -167,11 +180,16 @@ class RBFNN(BaseEstimator):
             Array with the centroids selected
         """
 
-        # TODO: Complete the code of the function
+        classes = np.unique(y_train)
+        centroids = []
+        for cls in classes:
+            cls_indices = np.where(y_train == cls)[0]
+            selected = np.random.choice(cls_indices, size=self.num_rbf//len(classes), replace=False)
+            centroids.extend(X_train[selected])
         
         return centroids
 
-    def _clustering(self, X_train: np.array, y_train: np.array) -> tuple[KMeans]:
+    def _clustering(self, X_train: np.array, y_train: np.array) -> Tuple[KMeans]:
         """
         Apply the clustering process
 
@@ -192,7 +210,14 @@ class RBFNN(BaseEstimator):
         kmeans: sklearn.cluster.KMeans
             KMeans object after the clustering
         """
-        # TODO: Complete the code of the function
+        kmeans = KMeans(
+            n_clusters=self.num_rbf,
+            init=self.centroids if self.classification else 'random',
+            n_init=1,
+            max_iter=500,
+            random_state=self.random_state,
+            )
+        kmeans.fit(X_train)
         
         return kmeans
 
@@ -208,7 +233,8 @@ class RBFNN(BaseEstimator):
         radii: array, shape (num_rbf,)
             Array with the radius of each RBF
         """
-        # TODO: Complete the code of the function
+        dist_matrix = squareform(pdist(self.centroids))
+        radii = np.mean(dist_matrix, axis=1)/2
         
         return radii
 
@@ -231,7 +257,8 @@ class RBFNN(BaseEstimator):
             Matrix with the activation of every RBF for every pattern. Moreover
             we include a last column with ones, which is going to act as bias
         """
-        # TODO: Complete the code of the function
+        activations = np.exp(- (distances ** 2) / (2 * self.radii[:, np.newaxis] ** 2))
+        r_matrix = np.hstack([activations, np.ones((activations.shape[0], 1))])
 
         return r_matrix
 
@@ -259,11 +286,12 @@ class RBFNN(BaseEstimator):
             For every output, values of the coefficients for each RBF and value
             of the bias
         """
-        # TODO: Complete the code of the function
+        r_pseudo_inverse = np.linalg.pinv(r_matrix)
+        coefficients = r_pseudo_inverse @ y_train
         
         return coefficients
 
-    def _logreg_classification(self) -> LogisticRegression | LogisticRegressionCV:
+    def _logreg_classification(self) -> Union[LogisticRegression, LogisticRegressionCV]:
         """
         Perform logistic regression training for the classification case
 
@@ -275,6 +303,22 @@ class RBFNN(BaseEstimator):
         logreg: sklearn.linear_model.LogisticRegression or LogisticRegressionCV
             Scikit-learn logistic regression model already trained
         """
-        # TODO: Complete the code of the function
+        if self.logisticcv:
+            logreg = LogisticRegressionCV(
+                Cs=[1e-3, 1e-2, 1e-1, 1, 10, 100, 1000],
+                penalty='l2' if self.l2 else 'l1',
+                solver='saga',
+                max_iter=100,
+                cv=3,
+                random_state=self.random_state,
+            )
+        else:
+            logreg = LogisticRegression(
+                penalty='l2' if self.l2 else 'l1',
+                C=1 / self.eta,
+                solver='saga',
+                max_iter=100,
+                random_state=self.random_state,
+            )
 
         return logreg

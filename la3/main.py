@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import os
 from sklearn.metrics import mean_squared_error, accuracy_score
+from sklearn.model_selection import train_test_split
 
 
 @click.command()
@@ -17,7 +18,6 @@ from sklearn.metrics import mean_squared_error, accuracy_score
     help="Name of the file with training data.",
     type=str,
 )
-# TODO: Capture the necessary parameters
 @click.option(
     "--standarize",
     "-s",
@@ -395,7 +395,16 @@ def read_data(
         Array containing the discriminative attribute for the testing patterns (only
         if fairness is set to True)
     """
-    # TODO: Complete the code of the function
+    data = pd.read_csv(dataset_filename, header=None)
+
+    n_features = data.shape[1] - 1
+    X = data.iloc[:, :n_features].values
+    y = data.iloc[:, n_features:].values
+
+    
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.25, random_state=random_state, stratify=y if classification else None
+    )
 
     if fairness:
         # Group label (we assume it is in the last column of X)
