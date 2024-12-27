@@ -31,7 +31,7 @@ from sklearn.model_selection import train_test_split
     help="Use classification instead of regression.",
 )
 @click.option(
-    "--ratio rbf",
+    "--ratio_rbf",
     "-r",
     default=0.1,
     show_default=True,
@@ -109,6 +109,7 @@ def main(
     seeds: int,
     model_filename: str,
     pred: int,
+    outputs: int,
 ):
     """
     Run several executions of RBFNN training and testing.
@@ -189,7 +190,6 @@ def main(
         print(f"Running on {dataset_name} - seed: {random_state}.")
         np.random.seed(random_state)
 
-        # TODO: Read the data
         data = read_data(dataset_filename, standarize, random_state, classification, fairness, pred)
 
         if not fairness and pred is None:
@@ -207,9 +207,16 @@ def main(
             ) = data
 
         if pred is None:  # Train the model
-            # TODO: Create the object
-
-            # TODO: Train the model
+            rbf = RBFNN(
+                ratio_rbf=ratio_rbf,
+                classification=classification,
+                l2=l2,
+                eta=eta,
+                logisticcv=logisticcv,
+                random_state=random_state,
+            )
+            
+            rbf.fit(X_train, y_train)
 
             if model_filename:
                 dir_name = f"{model_filename}/{dataset_name}/{random_state}.p"
@@ -220,7 +227,8 @@ def main(
             dir_name = f"{model_filename}/{dataset_name}/{random_state}.p"
             rbf = load(dir_name, random_state)
 
-        # TODO: Predict the output using the trained model
+        preds_train = rbf.predict(X_train)
+        preds_test = rbf.predict(X_test)
 
         if pred is not None:
             preds_kaggle = rbf.predict(X_test_kaggle)

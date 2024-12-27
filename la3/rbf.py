@@ -40,7 +40,7 @@ class RBFNN(BaseEstimator):
 
         self.is_fitted = False
         self.classification = classification
-        self.ration_rbf = ratio_rbf
+        self.ratio_rbf = ratio_rbf
         self.l2 = l2
         self.eta = eta
         self.logisticcv = logisticcv
@@ -79,7 +79,7 @@ class RBFNN(BaseEstimator):
             self.centroids = X[np.random.choice(X.shape[0], self.num_rbf, replace=False)]
 
         # 2. clustering
-        kmeans = self._clustering(X)
+        kmeans = self._clustering(X, y)
         self.centroids = kmeans.cluster_centers_
 
         # 3. Calculate radii
