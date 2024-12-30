@@ -1,3 +1,4 @@
+import math
 import numpy as np
 from sklearn.cluster import KMeans
 from scipy.spatial.distance import cdist, pdist, squareform
@@ -5,6 +6,7 @@ from sklearn.base import BaseEstimator
 from sklearn.metrics import accuracy_score, mean_squared_error
 from sklearn.linear_model import LogisticRegression, LogisticRegressionCV
 from typing import Tuple, Union
+from sklearn.model_selection import train_test_split
 
 
 class RBFNN(BaseEstimator):
@@ -69,7 +71,7 @@ class RBFNN(BaseEstimator):
         """
 
         np.random.seed(self.random_state)
-        self.num_rbf = int(self.ratio_rbf * y.shape[0])
+        self.num_rbf = max(1, int(self.ratio_rbf * X.shape[0]))
         print(f"Number of RBFs used: {self.num_rbf}")
 
         # 1. Init centroids
@@ -123,7 +125,7 @@ class RBFNN(BaseEstimator):
         r_matrix = self._calculate_r_matrix(distances)
 
         # 4. radii for test set
-        self.radii = self._calculate_radii(self.centroids)
+        self.radii = self._calculate_radii()
 
         if self.classification:
             predictions = self.logreg.predict(r_matrix)
@@ -181,10 +183,17 @@ class RBFNN(BaseEstimator):
         """
 
         classes = np.unique(y_train)
+        class_share = math.floor(self.num_rbf/len(classes))
+        remaining = self.num_rbf - (class_share * len(classes))
+
         centroids = []
         for cls in classes:
             cls_indices = np.where(y_train == cls)[0]
-            selected = np.random.choice(cls_indices, size=self.num_rbf//len(classes), replace=False)
+            if remaining > 0:
+                selected = train_test_split(cls_indices, test_size=class_share+1, stratify=y_train[cls_indices])[1]
+                remaining -= 1
+            else:
+                selected = train_test_split(cls_indices, test_size=class_share, stratify=y_train[cls_indices])[1]
             centroids.extend(X_train[selected])
         
         return centroids
@@ -212,7 +221,7 @@ class RBFNN(BaseEstimator):
         """
         kmeans = KMeans(
             n_clusters=self.num_rbf,
-            init=self.centroids if self.classification else 'random',
+            init=self.centroids,
             n_init=1,
             max_iter=500,
             random_state=self.random_state,
@@ -234,7 +243,8 @@ class RBFNN(BaseEstimator):
             Array with the radius of each RBF
         """
         dist_matrix = squareform(pdist(self.centroids))
-        radii = np.mean(dist_matrix, axis=1)/2
+        n_centroids = dist_matrix.shape[0]
+        radii = np.sum(dist_matrix, axis=1)/(2 * (n_centroids - 1))
         
         return radii
 
@@ -257,7 +267,7 @@ class RBFNN(BaseEstimator):
             Matrix with the activation of every RBF for every pattern. Moreover
             we include a last column with ones, which is going to act as bias
         """
-        activations = np.exp(- (distances ** 2) / (2 * self.radii[:, np.newaxis] ** 2))
+        activations = np.exp(- (distances ** 2) / (2 * self.radii[np.newaxis, :] ** 2))
         r_matrix = np.hstack([activations, np.ones((activations.shape[0], 1))])
 
         return r_matrix

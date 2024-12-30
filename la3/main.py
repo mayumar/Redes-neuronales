@@ -7,6 +7,7 @@ import pandas as pd
 import os
 from sklearn.metrics import mean_squared_error, accuracy_score
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 
 
 @click.command()
@@ -206,6 +207,9 @@ def main(
                 X_test_disc,
             ) = data
 
+        y_train = y_train.ravel()
+        y_test = y_test.ravel()
+
         if pred is None:  # Train the model
             rbf = RBFNN(
                 ratio_rbf=ratio_rbf,
@@ -266,16 +270,32 @@ def main(
         if fairness:
 
             # TODO: Calculate the first fairness metric
-            train_results_per_seed["FN0"] = train_fn.by_group["White"] * 100
-            train_results_per_seed["FN1"] = train_fn.by_group["Black"] * 100
-            test_results_per_seed["FN0"] = test_fn.by_group["White"] * 100
-            test_results_per_seed["FN1"] = test_fn.by_group["Black"] * 100
+            train_fn = {
+                "White": np.sum((X_train_disc == "White") & (y_train == 1) & (preds_train == 0)) / np.sum((X_train_disc == "White") & (y_train == 1)),
+                "Black": np.sum((X_train_disc == "Black") & (y_train == 1) & (preds_train == 0)) / np.sum((X_train_disc == "Black") & (y_train == 1))
+            }
+            test_fn = {
+                "White": np.sum((X_test_disc == "White") & (y_test == 1) & (preds_test == 0)) / np.sum((X_test_disc == "White") & (y_test == 1)),
+                "Black": np.sum((X_test_disc == "Black") & (y_test == 1) & (preds_test == 0)) / np.sum((X_test_disc == "Black") & (y_test == 1))
+            }
+            train_results_per_seed["FN0"] = train_fn["White"] * 100
+            train_results_per_seed["FN1"] = train_fn["Black"] * 100
+            test_results_per_seed["FN0"] = test_fn["White"] * 100
+            test_results_per_seed["FN1"] = test_fn["Black"] * 100
 
             # TODO: Calculate the second fairness metric
-            train_results_per_seed["FP0"] = train_fp.by_group["White"] * 100
-            train_results_per_seed["FP1"] = train_fp.by_group["Black"] * 100
-            test_results_per_seed["FP0"] = test_fp.by_group["White"] * 100
-            test_results_per_seed["FP1"] = test_fp.by_group["Black"] * 100
+            train_fp = {
+                "White": np.sum((X_train_disc == "White") & (y_train == 0) & (preds_train == 1)) / np.sum((X_train_disc == "White") & (y_train == 0)),
+                "Black": np.sum((X_train_disc == "Black") & (y_train == 0) & (preds_train == 1)) / np.sum((X_train_disc == "Black") & (y_train == 0))
+            }
+            test_fp = {
+                "White": np.sum((X_test_disc == "White") & (y_test == 0) & (preds_test == 1)) / np.sum((X_test_disc == "White") & (y_test == 0)),
+                "Black": np.sum((X_test_disc == "Black") & (y_test == 0) & (preds_test == 1)) / np.sum((X_test_disc == "Black") & (y_test == 0))
+            }
+            train_results_per_seed["FP0"] = train_fp["White"] * 100
+            train_results_per_seed["FP1"] = train_fp["Black"] * 100
+            test_results_per_seed["FP0"] = test_fp["White"] * 100
+            test_results_per_seed["FP1"] = test_fp["Black"] * 100
 
         results.append(train_results_per_seed)
         results.append(test_results_per_seed)
@@ -288,6 +308,28 @@ def main(
 
         # TODO: Calculate the mean and standard deviation of the metrics and add them to the
         #  results DataFrame
+        for partition in results['partition'].unique():
+            partition_results = results[results['partition'] == partition]
+            means = partition_results[metrics].mean()
+
+            # Append the mean and std for this partition to the results
+            mean_row = {"seed": "Mean", "partition": partition}
+            mean_row.update(means)
+
+            mean_std.append(mean_row)
+
+        for partition in results['partition'].unique():
+            partition_results = results[results['partition'] == partition]
+            stds = partition_results[metrics].std()
+
+            # Append the mean and std for this partition to the results
+            std_row = {"seed": "Std", "partition": partition}
+            std_row.update(stds)
+
+            mean_std.append(std_row)
+
+        # Add mean and std rows to the results DataFrame
+        results = pd.concat([results, pd.DataFrame(mean_std)], ignore_index=True)
 
     results.set_index(["seed", "partition"], inplace=True)
 
@@ -413,6 +455,14 @@ def read_data(
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.25, random_state=random_state, stratify=y if classification else None
     )
+
+    if standarize:
+        scaler = StandardScaler()
+        X_train = scaler.fit_transform(X_train)
+        X_test = scaler.transform(X_test)
+        if not classification: # Assuming regression problem, scale y as well
+            y_train = scaler.fit_transform(y_train)
+            y_test = scaler.transform(y_test)
 
     if fairness:
         # Group label (we assume it is in the last column of X)
