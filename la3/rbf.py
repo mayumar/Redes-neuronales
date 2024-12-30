@@ -318,7 +318,7 @@ class RBFNN(BaseEstimator):
                 Cs=[1e-3, 1e-2, 1e-1, 1, 10, 100, 1000],
                 penalty='l2' if self.l2 else 'l1',
                 solver='saga',
-                max_iter=100,
+                max_iter=10,
                 cv=3,
                 random_state=self.random_state,
             )
@@ -327,7 +327,7 @@ class RBFNN(BaseEstimator):
                 penalty='l2' if self.l2 else 'l1',
                 C=1 / self.eta,
                 solver='saga',
-                max_iter=100,
+                max_iter=10,
                 random_state=self.random_state,
             )
 
