@@ -131,6 +131,8 @@ class RBFNN(BaseEstimator):
             predictions = self.logreg.predict(r_matrix)
         else:
             predictions = r_matrix @ self.coefficients
+            # Redondear las predicciones para simular clasificación
+            #predictions = np.round(predictions)
 
         return predictions
 

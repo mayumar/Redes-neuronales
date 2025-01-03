@@ -185,6 +185,8 @@ def main(
     seeds_list = range(seeds)
     dataset_name = dataset_filename.split("/")[-1].split(".")[0]
 
+    nonzero_coefficients = 0
+
     if pred is not None:
         seeds_list = [pred]
 
@@ -222,6 +224,15 @@ def main(
             )
             
             rbf.fit(X_train, y_train)
+
+            if classification:
+                # Calcular coeficientes después de entrenar
+                print(f"Total coeficientes (después de entrenar): {count_nonzero_coefficients(rbf.logreg)}")
+                nonzero_coefficients += count_nonzero_coefficients(rbf.logreg)
+
+            # Accede al valor de C seleccionado
+            if rbf.logisticcv:
+                print("Valor de C seleccionado:", rbf.logreg.C_)
 
             if model_filename:
                 dir_name = f"{model_filename}/{dataset_name}/{random_state}.p"
@@ -339,6 +350,7 @@ def main(
     print("******************")
 
     print(results)
+    print(f"Media del total de coeficientes: {nonzero_coefficients/len(seeds_list)}")
 
 
 def save(
@@ -448,15 +460,21 @@ def read_data(
     """
     data = pd.read_csv(dataset_filename, header=None)
 
+    # Separe feautres and target
     n_features = data.shape[1] - 1
     X = data.iloc[:, :n_features].values
     y = data.iloc[:, n_features:].values
 
-    
+    # Split the data
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.25, random_state=random_state, stratify=y if classification else None
+        X, y,
+        test_size=0.25,
+        shuffle=True,
+        random_state=random_state,
+        stratify=y if classification else None
     )
 
+    # Standarize data if requested
     if standarize:
         scaler = StandardScaler()
         X_train = scaler.fit_transform(X_train)
@@ -478,6 +496,27 @@ def read_data(
         return X_train, y_train, X_test, y_test, X_test_kaggle  # KAGGLE
 
     return X_train, y_train, X_test, y_test
+
+
+def count_nonzero_coefficients(model):
+    """
+    Cuenta el número de coeficientes no nulos en un modelo entrenado.
+    
+    Parameters
+    ----------
+    model: sklearn.linear_model.LogisticRegression
+        Modelo de regresión logística entrenado.
+    
+    Returns
+    -------
+    int
+        Número de coeficientes no nulos.
+    """
+    if hasattr(model, "coef_"):
+        # Coeficientes del modelo (excluyendo el sesgo)
+        return np.sum(np.abs(model.coef_) > 1e-6)
+    else:
+        raise ValueError("El modelo no tiene coeficientes.")
 
 
 if __name__ == "__main__":
