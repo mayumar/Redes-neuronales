@@ -317,7 +317,7 @@ class RBFNN(BaseEstimator):
         """
         if self.logisticcv:
             logreg = LogisticRegressionCV(
-                Cs=[1e-3, 1e-2, 1e-1, 1, 10, 100, 1000],
+                Cs=[0.001, 0.01, 0.1, 1, 10, 100, 1000],
                 penalty='l2' if self.l2 else 'l1',
                 solver='saga',
                 max_iter=10,
@@ -334,3 +334,31 @@ class RBFNN(BaseEstimator):
             )
 
         return logreg
+
+
+    def get_misclassified_indices(self, X: np.array, y: np.array) -> np.array:
+        """
+        Obtiene los índices de los patrones mal clasificados.
+
+        Parameters
+        ----------
+        X: array, shape (n_patterns, n_inputs)
+            Matriz con las entradas de los patrones a evaluar.
+        y: array, shape (n_patterns,)
+            Vector con las etiquetas verdaderas de los patrones.
+
+        Returns
+        -------
+        misclassified_indices: array
+            Índices de los patrones mal clasificados.
+        """
+        if not self.is_fitted:
+            raise ValueError("El modelo no está entrenado aún.")
+        
+        predictions = self.predict(X)
+        if self.classification:
+            misclassified_indices = np.where(predictions != y)[0]
+        else:
+            raise ValueError("Este método solo es válido para problemas de clasificación.")
+
+        return misclassified_indices

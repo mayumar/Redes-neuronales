@@ -6,7 +6,8 @@ import pickle
 import numpy as np
 import pandas as pd
 import os
-from sklearn.metrics import mean_squared_error, accuracy_score
+import matplotlib.pyplot as plt
+from sklearn.metrics import mean_squared_error, accuracy_score, confusion_matrix, ConfusionMatrixDisplay
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
@@ -274,6 +275,23 @@ def main(
             "MSE": mean_squared_error(y_test, preds_test),
         }
 
+        # # Crear la matriz de confusión
+        # cm = confusion_matrix(y_test, preds_test)
+
+        # # Mostrar la matriz de confusión
+        # disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+        # disp.plot(cmap="Blues")
+        # plt.show()
+
+        # Obtener índices mal clasificados
+        # misclassified_indices = rbf.get_misclassified_indices(X_test, y_test)
+
+        # print("Índices de los patrones mal clasificados:", misclassified_indices)
+
+        # Mostrar índice, valor real y predicción
+        for idx in misclassified_indices:
+            print(f"Índice: {idx}, Real: {y_test[idx]}, Predicho: {preds_test[idx]}")
+
         if classification:
             train_results_per_seed["CCR"] = accuracy_score(y_train, preds_train) * 100
             test_results_per_seed["CCR"] = accuracy_score(y_test, preds_test) * 100
@@ -458,7 +476,8 @@ def read_data(
         Array containing the discriminative attribute for the testing patterns (only
         if fairness is set to True)
     """
-    data = pd.read_csv(dataset_filename, header=None)
+    #data = pd.read_csv(dataset_filename, header=None)
+    data = pd.read_csv(dataset_filename)
 
     # Separe feautres and target
     n_features = data.shape[1] - 1
@@ -493,6 +512,7 @@ def read_data(
         return X_train, y_train, X_test, y_test, X_train_disc, X_test_disc
 
     if prediction_mode is not None:
+        X_test_kaggle = pd.read_csv("imc-2024-25-la-3/titanic_kaggle.csv")
         return X_train, y_train, X_test, y_test, X_test_kaggle  # KAGGLE
 
     return X_train, y_train, X_test, y_test
