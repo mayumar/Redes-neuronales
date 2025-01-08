@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error, accuracy_score, confusion_matrix, ConfusionMatrixDisplay
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from typing import Tuple
 
 
 @click.command()
@@ -284,13 +285,17 @@ def main(
         # plt.show()
 
         # Obtener índices mal clasificados
-        # misclassified_indices = rbf.get_misclassified_indices(X_test, y_test)
+        # misclassified_indices = []
+
+        # for idx in range(len(preds_test)):
+        #     if preds_test[idx] != y_test[idx]:
+        #         misclassified_indices.append(idx)
 
         # print("Índices de los patrones mal clasificados:", misclassified_indices)
 
         # Mostrar índice, valor real y predicción
-        for idx in misclassified_indices:
-            print(f"Índice: {idx}, Real: {y_test[idx]}, Predicho: {preds_test[idx]}")
+        # for idx in misclassified_indices:
+        #     print(f"Índice: {idx}, Real: {y_test[idx]}, Predicho: {preds_test[idx]}")
 
         if classification:
             train_results_per_seed["CCR"] = accuracy_score(y_train, preds_train) * 100
@@ -330,6 +335,10 @@ def main(
         results.append(train_results_per_seed)
         results.append(test_results_per_seed)
 
+        # if random_state == 3:
+        #     for idx in [39, 49, 62, 86, 89, 108, 122, 139, 152, 159, 171, 242, 270, 274, 290]:
+        #         show_image_from_data(X_test, y_test, idx)
+
     results = pd.DataFrame(results)
     if pred is None:
         metrics = results.columns[2:]
@@ -368,7 +377,7 @@ def main(
     print("******************")
 
     print(results)
-    print(f"Media del total de coeficientes: {nonzero_coefficients/len(seeds_list)}")
+    # print(f"Media del total de coeficientes: {nonzero_coefficients/len(seeds_list)}")
 
 
 def save(
@@ -538,6 +547,38 @@ def count_nonzero_coefficients(model):
     else:
         raise ValueError("El modelo no tiene coeficientes.")
 
+
+def show_image_from_data(X: np.ndarray, y: np.ndarray, index: int, img_size: Tuple[int, int] = (28, 28)):
+    """
+    Muestra la imagen correspondiente al índice dado desde un conjunto de datos X y y.
+
+    Parameters
+    ----------
+    X: np.ndarray
+        Matriz con los datos de las imágenes. Cada fila es una imagen representada en forma vectorial.
+    y: np.ndarray
+        Vector con las etiquetas de las imágenes.
+    index: int
+        El índice del registro que se quiere mostrar.
+    img_size: Tuple[int, int], optional
+        Tamaño de la imagen (por defecto es 28x28 para noMNIST).
+    """
+    # Obtener los píxeles de la imagen y su etiqueta
+    pixels = X[index]
+    label = y[index]
+
+    # Redimensionar los píxeles a la forma de la imagen
+    img_array = np.reshape(pixels, img_size).astype(np.uint8)
+
+    # Mostrar la imagen usando matplotlib
+    plt.figure(figsize=(img_size[0]/10, img_size[1]/10))
+    plt.imshow(img_array, cmap="gray")
+    plt.axis("off")  # Desactivar los ejes
+
+    # Ajustar la figura para que no haya márgenes
+    plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
+
+    plt.savefig(f"imgs/{index}")
 
 if __name__ == "__main__":
     main()
