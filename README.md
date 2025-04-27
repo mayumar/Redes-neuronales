@@ -6,7 +6,8 @@ Este repositorio contiene diferentes implementaciones de distintos tipos de rede
 - Perceptrón multicapa para clasificación binaria
 - Perceptrón multicapa para clasificación multiclase
 - Red Neuronal RBF
-
+- Máquina de Vector Soporte
+  
 ## Autores
 María Teresa Alba Rueda
 Pedro Rafael Velasco Priego
