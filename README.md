@@ -8,3 +8,5 @@ Este repositorio contiene diferentes implementaciones de distintos tipos de rede
 - Red Neuronal RBF
 
 ## Autores
+María Teresa Alba Rueda
+Pedro Rafael Velasco Priego
