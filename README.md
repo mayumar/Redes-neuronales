@@ -9,5 +9,5 @@ Este repositorio contiene diferentes implementaciones de distintos tipos de rede
 - Máquina de Vector Soporte
   
 ## Autores
-María Teresa Alba Rueda
-Pedro Rafael Velasco Priego
+- María Teresa Alba Rueda
+- Pedro Rafael Velasco Priego
